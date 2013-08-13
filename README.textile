@@ -79,7 +79,7 @@ This project maintains 80% code coverage and conforms to Google's JavaScript Sty
 
 h2. Testing
 
-@ nodeunit nodeunit simple_table_refine_test.js @
+@nodeunit simple_table_refine_test.js@
 
 You may need to install "nodeunit":https://github.com/caolan/nodeunit first.
 
