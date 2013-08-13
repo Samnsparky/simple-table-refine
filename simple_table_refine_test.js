@@ -11,7 +11,7 @@ var simple_table_refine = require('./simple_table_refine');
 /**
  * Test removing rows by their index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfIndex = function(test)
 {
@@ -48,7 +48,7 @@ exports.testIgnoreRowIfIndex = function(test)
  * Test removing rows by testing for given values in given cols given a set of
  * rules, all of which must be fulfilled before the column is removed.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfVal = function(test)
 {
@@ -90,7 +90,7 @@ exports.testIgnoreRowIfVal = function(test)
  * rules, all of which must be fulfilled before the column is removed. Some
  * column selections will take more than one column.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfValManyCols = function(test)
 {
@@ -130,7 +130,7 @@ exports.testIgnoreRowIfValManyCols = function(test)
  * rules, all of which must be fulfilled before the column is removed. For
  * at least one rule, this test uses the any value.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfValAny = function(test)
 {
@@ -172,7 +172,7 @@ exports.testIgnoreRowIfValAny = function(test)
  * at least one rule, this test uses the any value by not specifying a column
  * value.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfValAnyDefault = function(test)
 {
@@ -212,7 +212,7 @@ exports.testIgnoreRowIfValAnyDefault = function(test)
  * Test removing rows by testing for given values in given cols given a set of
  * rules, only one of which must be fulfilled before the column is removed.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfValLoose = function(test)
 {
@@ -250,7 +250,7 @@ exports.testIgnoreRowIfValLoose = function(test)
  * rules, only one of which must be fulfilled before the column is removed. This
  * test has at least one rule with the any column option.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreRowIfValLooseAny = function(test)
 {
@@ -284,7 +284,7 @@ exports.testIgnoreRowIfValLooseAny = function(test)
 /**
  * Test removing columns by their index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfIndex = function(test)
 {
@@ -321,7 +321,7 @@ exports.testIgnoreColIfIndex = function(test)
  * Test removing colums by testing for given values in given rows given a set of
  * rules, all of which must be fulfilled before the column is removed.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfVal = function(test)
 {
@@ -363,7 +363,7 @@ exports.testIgnoreColIfVal = function(test)
  * rules, all of which must be fulfilled before the column is removed. At least
  * one of the row selectors will contain more than one index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfVals = function(test)
 {
@@ -405,7 +405,7 @@ exports.testIgnoreColIfVals = function(test)
  * rules, all of which must be fulfilled before the column is removed. At least
  * one test must use the any row option.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfValAny = function(test)
 {
@@ -446,7 +446,7 @@ exports.testIgnoreColIfValAny = function(test)
  * Test removing colums by testing for given values in given rows given a set of
  * rules, only one of which must be fulfilled before the column is removed.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfValLoose = function(test)
 {
@@ -486,7 +486,7 @@ exports.testIgnoreColIfValLoose = function(test)
  * rules, only one of which must be fulfilled before the column is removed. At
  * least one of the row selectors will take more than one index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfValsLoose = function(test)
 {
@@ -526,7 +526,7 @@ exports.testIgnoreColIfValsLoose = function(test)
  * rules, only one of which must be fulfilled before the column is removed. At
  * least one of the rules will use the any row option.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testIgnoreColIfValLooseAny = function(test)
 {
@@ -565,7 +565,7 @@ exports.testIgnoreColIfValLooseAny = function(test)
  * Test running a string find / replace using the any option for the row but not
  * the column.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testReplaceAnyRow = function(test)
 {
@@ -604,7 +604,7 @@ exports.testReplaceAnyRow = function(test)
  * Test running a string find / replace using the any option for the row but not
  * the column. One column selector will have more than one index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testReplaceAnyRowManyCols = function(test)
 {
@@ -643,7 +643,7 @@ exports.testReplaceAnyRowManyCols = function(test)
  * Test running a string find / replace using the any option for the column but
  * not the row.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testReplaceAnyCol = function(test)
 {
@@ -682,7 +682,7 @@ exports.testReplaceAnyCol = function(test)
  * Test running a string find / replace using the any option for the column but
  * not the row. At least one row selector will have more than one index.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testReplaceAnyColManyRows = function(test)
 {
@@ -718,7 +718,7 @@ exports.testReplaceAnyColManyRows = function(test)
 /**
  * Test transposing a dataset.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testTranspose = function(test)
 {
@@ -753,7 +753,7 @@ exports.testTranspose = function(test)
  * Test interpreting string seraialization of dataset boolean values, converting
  * them to the corresponding boolean values.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testInterpretStrBoolean = function(test)
 {
@@ -782,7 +782,7 @@ exports.testInterpretStrBoolean = function(test)
 /**
  * Test interpeting a date using moment.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/
 exports.testInterpretStrDate = function(test)
 {
@@ -814,7 +814,7 @@ exports.testInterpretStrDate = function(test)
  * Test interpreting string seraialization of dataset integer values, converting
  * them to the corresponding integer values.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/ 
 exports.testInterpretStrInteger = function(test)
 {
@@ -846,7 +846,7 @@ exports.testInterpretStrInteger = function(test)
  * them to the corresponding integer values. Interpret all columns but only a
  * specific row.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/ 
 exports.testInterpretStrIntegerAnyCol = function(test)
 {
@@ -885,7 +885,7 @@ exports.testInterpretStrIntegerAnyCol = function(test)
  * them to the corresponding integer values. Interpret all columns but only a
  * specific set of rows.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/ 
 exports.testInterpretStrIntegerAnyColManyRows = function(test)
 {
@@ -926,7 +926,7 @@ exports.testInterpretStrIntegerAnyColManyRows = function(test)
  * them to the corresponding integer values. Interpret all row but only on
  * a specific column.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/ 
 exports.testInterpretStrIntegerAnyRow = function(test)
 {
@@ -965,7 +965,7 @@ exports.testInterpretStrIntegerAnyRow = function(test)
  * them to the corresponding integer values. Interpret all rows but only on
  * specific columns.
  *
- * @param {nodeunit.test} The test this routine is running under.
+ * @param {nodeunit.test} test The test this routine is running under.
 **/ 
 exports.testInterpretStrIntegerAnyRowManyCols = function(test)
 {
@@ -997,6 +997,14 @@ exports.testInterpretStrIntegerAnyRowManyCols = function(test)
 };
 
 
+/**
+ * Test running a series of operations in order.
+ *
+ * Test running a series of operations instead of a single operation refinement,
+ * ensuring that the operations execute in the order listed.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
 exports.testManyOperationRefinement = function(test)
 {
     var testInput = [
