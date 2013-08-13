@@ -1,4 +1,26 @@
 {
-    "name": "generic-tabe-refine",
-    "version": "0.0.1"
+    "name": "simple-table-refine",
+    "version": "0.0.1",
+    "description": "Utility providing very simple 2D Array refinement / cleaning.",
+    "keywords": [
+        "table",
+        "2D",
+        "array",
+        "refine",
+        "refinement",
+        "refining",
+        "clean",
+        "cleaning",
+        "filter",
+        "transpose"
+    ],
+    "license": "MIT",
+    "author":{
+        "name": "Sam Pottinger",
+        "url": "http://gleap.org"
+    },
+    "dependencies":{
+        "async": "~0",
+        "moment": "~2"
+    }
 }

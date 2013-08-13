@@ -1,5 +1,5 @@
 /**
- * Utility providing very simple refinement / cleaning for 2D Arrays.
+ * Utility providing very simple 2D Array refinement / cleaning.
  *
  * Utility that provides very simple refinement and data clean up capabilities
  * for 2D arrays / tabular data. Features include filtering rows and columns,
@@ -23,6 +23,29 @@ var refineStrategies = {
     interpretStr: interpretStr,
     transpose: transpose
 };
+
+
+function RuleCombiner(combineWithAnd)
+{
+    this.clauseResults = [];
+
+    this.reportShouldKeep = function (clauseResult)
+    {
+        this.clauseResults.push(clauseResult);
+    }
+
+    this.shouldKeep = function ()
+    {
+        if (combineWithAnd) {
+            // Indicate that the row should not be kept if any clause passed
+            return this.clauseResults.indexOf(false) == -1;
+        } else {
+            // Indiciate that the row should not be kept if all clauses failed
+            var allClausesFailed = this.clauseResults.indexOf(true) == -1;
+            return !allClausesFailed;
+        }
+    };
+}
 
 
 /**
@@ -73,7 +96,7 @@ function genericErrorHandler(err)
 **/
 function findMaxNumCols(targetRows)
 {
-    var numCols = targetRows.map(function(e){return e.length;});
+    var numCols = targetRows.map(function (e) {return e.length;});
     return Math.max.apply(null, numCols);
 }
 
@@ -93,25 +116,25 @@ function findMaxNumCols(targetRows)
 **/
 function createKeepRowValFuncs(ignoreValueRules)
 {
-    var shouldKeepValueFuncs = ignoreValueRules.map(function(rule){
+    var shouldKeepValueFuncs = ignoreValueRules.map(function (rule) {
         var targetCol = rule.col;
         var targetVal = rule.val;
 
         var targetCols = prepareListOfIndicies(targetCol);
 
         if (targetCols === ANY_OPT) {
-            return function (row) {
-                for (var column in row) {
+            return function (row, rowIndex) {
+                var numColumns = row.length;
+                for (var column=0; column<numColumns; column++) {
                     if (row[column] === targetVal)
                         return false;
                 }
                 return true;
             };
-        }
-        else
-        {
-            return function(row){
-                for (var i in targetCols) {
+        } else {
+            return function(row,  rowIndex) {
+                var numColumns = targetCols.length;
+                for (var i=0; i<numColumns; i++) {
                     var currentCol = targetCols[i];
                     var hasCol = row.length > currentCol;
                     if (hasCol && row[currentCol] === targetVal)
@@ -122,6 +145,86 @@ function createKeepRowValFuncs(ignoreValueRules)
         }
     });
     return shouldKeepValueFuncs;
+}
+
+
+function createRowKeepFunc(rules, combinedWithAnd)
+{
+    // Create rules to ignore rows with a certain index.
+    var ignoreRowRules = rules.filter(function (e) {
+        return e.index !== undefined;
+    });
+    var ignoreRowsByRule = ignoreRowRules.map(function (e) {
+        var index = e.index;
+        if(index instanceof Array)
+            return e.index;
+        else
+            return [e.index];
+    });
+    if (ignoreRowsByRule.length > 0) {
+        var ignoreRows = ignoreRowsByRule.reduce(function(a, b) {
+            return a.concat(b);
+        });
+    } else {
+        ignoreRows = [];
+    }
+    var shouldKeepIndex = function (rowIndex) {
+        return ignoreRows.indexOf(parseInt(rowIndex, 10)) == -1;
+    };
+
+    // Create rules to ignore rows containing any one of many values.
+    var ignoreValueRules = rules.filter(function (e) {
+        return e.val !== undefined;
+    });
+    var shouldKeepValueFuncs = createKeepRowValFuncs(ignoreValueRules);
+
+    // Create rules to ignore rows containing all of many values.
+    var ignoreCombinedValueRules = rules.filter(function (e) {
+        return e.allOf !== undefined;
+    });
+    var shouldKeepCombinedFuncs = ignoreCombinedValueRules.map(function (rules) {
+        return createRowKeepFunc(rules.allOf, false);
+    });
+
+    // Prepare a function that runs all of the above rules.
+    var shouldKeepFuncs = []
+    shouldKeepFuncs.push.apply(shouldKeepFuncs, shouldKeepValueFuncs);
+    shouldKeepFuncs.push.apply(shouldKeepFuncs, shouldKeepCombinedFuncs);
+
+    var shouldKeepFunc;
+    if (ignoreRows.length == 0) {
+        shouldKeepFunc = function(row, rowIndex)
+        {
+            var ruleCombiner = new RuleCombiner(combinedWithAnd);
+            var numShouldKeepFuncs = shouldKeepFuncs.length;
+            for (var i=0; i<numShouldKeepFuncs; i++) {
+                var targetFunc = shouldKeepFuncs[i];
+                    ruleCombiner.reportShouldKeep(targetFunc(row, rowIndex));
+            }
+
+            return ruleCombiner.shouldKeep();
+        };
+    } else if (ignoreRows.length > 0 && shouldKeepFuncs.length == 0) {
+        shouldKeepFunc = function(row, rowIndex)
+        {
+            return shouldKeepIndex(rowIndex);
+        };
+    } else {
+        shouldKeepFunc = function(row, rowIndex)
+        {
+            var ruleCombiner = new RuleCombiner(combinedWithAnd);
+            var numShouldKeepFuncs = shouldKeepFuncs.length;
+            ruleCombiner.reportShouldKeep(shouldKeepIndex(rowIndex));
+            for (var i=0; i<numShouldKeepFuncs; i++) {
+                var targetFunc = shouldKeepFuncs[i];
+                ruleCombiner.reportShouldKeep(targetFunc(row, rowIndex));
+            }
+
+            return ruleCombiner.shouldKeep();
+        };
+    }
+
+    return shouldKeepFunc;
 }
 
 
@@ -145,59 +248,15 @@ function createKeepRowValFuncs(ignoreValueRules)
 **/
 function ignoreRowIf(targetRows, params, onSuccess, onError)
 {
-    // Create rules to ignore rows with a certain index.
-    var ignoreRowRules = params.filter(function(e){
-        return e.index !== undefined;
-    });
-    var ignoreRows = ignoreRowRules.map(function(e){
-        return e.index;
-    });
-    var shouldKeepIndex = function(rowIndex){
-        return ignoreRows.indexOf(parseInt(rowIndex, 10)) == -1;
-    };
-
-    // Create rules to ignore rows containing any one of many values.
-    var ignoreValueRules = params.filter(function(e){
-        return e.col !== undefined;
-    });
-    var shouldKeepValueFuncs = createKeepRowValFuncs(ignoreValueRules);
-
-    // Create rules to ignore rows containing all of many values.
-    var ignoreCombinedValueRules = params.filter(function(e){
-        return e.combined !== undefined;
-    });
-    var shouldKeepCombinedFuncs = ignoreCombinedValueRules.map(function(rules){
-        var funcs = createKeepRowValFuncs(rules.combined);
-        return function(target){
-            for (i in funcs) {
-                if (funcs[i](target))
-                    return true;
-            }
-            return false;
-        };
-    });
-
-    // Prepare a function that runs all of the above rules.
-    var shouldKeepFuncs = []
-    shouldKeepFuncs.push.apply(shouldKeepFuncs, shouldKeepValueFuncs);
-    shouldKeepFuncs.push.apply(shouldKeepFuncs, shouldKeepCombinedFuncs);
-    var shouldKeepFunc = function(target)
-    {
-        for (var i in shouldKeepFuncs) {
-            var targetFunc = shouldKeepFuncs[i];
-            if (!targetFunc(target))
-                return false;
-        }
-
-        return true;
-    }
+    var shouldKeepFunc = createRowKeepFunc(params, true);
 
     // Run the rules and create the modified version of the dataset.
     var retVal = [];
 
-    for (var rowIndex in targetRows) {
+    var numRows = targetRows.length;
+    for (var rowIndex=0; rowIndex<numRows; rowIndex++) {
         var targetRow = targetRows[rowIndex];
-        if (shouldKeepIndex(rowIndex) && shouldKeepFunc(targetRow))
+        if (shouldKeepFunc(targetRow, rowIndex))
             retVal.push(targetRow);
     }
 
@@ -224,9 +283,11 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
     // reporting columns that match, adding them to matchedCols.
     var checkRows = function(currentRule, targetRows)
     {
-        for (var rowIndex in targetRows) {
+        var numRows = targetRows.length;
+        for (var rowIndex=0; rowIndex<numRows; rowIndex++) {
             var targetRow = targetRows[rowIndex];
-            for (var colIndex in targetRow) {
+            var numCols = targetRow.length;
+            for (var colIndex=0; colIndex<numCols; colIndex++) {
                 if (targetRow[colIndex] === currentRule.val)
                     matchedCols.push(colIndex);
             }
@@ -234,7 +295,8 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
     }
 
     // Check all rules.
-    for(var ruleIndex in valueIndexIgnoreRules)
+    var numRules = valueIndexIgnoreRules.length;
+    for(var ruleIndex=0; ruleIndex<numRules; ruleIndex++)
     {
         var currentRule = valueIndexIgnoreRules[ruleIndex];
         var rowIndicies = prepareListOfIndicies(currentRule.row);
@@ -244,12 +306,12 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
             checkRows(currentRule, targetRows);
         } else {
             var numRows = targetRows.length;
-            rowIndicies = rowIndicies.filter(function(i){
+            rowIndicies = rowIndicies.filter(function (i) {
                 return i < numRows;
             });
 
             // Find the rows that match the user's selection options.
-            var ruleRows = rowIndicies.map(function(i){
+            var ruleRows = rowIndicies.map(function (i) {
                 return targetRows[i];
             });
             checkRows(currentRule, ruleRows);
@@ -266,23 +328,25 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
  * Find the columns that satisfy all of the rules in a set of rules, each
  * checking for a value in a specified row.
  *
- * @param {Array} valueIndexIgnoreRules An Array of Object describing rules,
- *      each witha a row (integer) and a val attribute representing the row to
+ * @param {Array} rules An Array of Object describing rules, either index or
+ *      rule with a row (integer) and a val attribute representing the row to
  *      look for the value in respectively.
  * @param {Array} targetRows Array of Array (dataset, table, 2D array) to find
  *      the columns in.
  * @return {Array} An Array of integer indicies, each an index of a column that
  *      satisfied all of the provided rules.
 **/
-function findColsByCombinedVals(valueIndexIgnoreRules, targetRows)
+function findColsByCombinedVals(rules, targetRows)
 {
     var matchedCols = [];
+    var allowedColsToMatch = [];
     var numCols = findMaxNumCols(targetRows);
 
     // Check a set of rows for columns that contain all of a set of values,
     // reporting matched columns by adding them to the matchedCols Array.
     var checkRows = function (targetRows, subRule, colIndex) {
-        for(var rowIndex in targetRows) {
+        var numRows = targetRows.length;
+        for(var rowIndex=0; rowIndex<numRows; rowIndex++) {
             var targetRow = targetRows[rowIndex];
             if (targetRow.length > colIndex) {
                 if(targetRow[colIndex] === subRule.val)
@@ -293,40 +357,65 @@ function findColsByCombinedVals(valueIndexIgnoreRules, targetRows)
         return false;
     };
 
-    // Go through all rules
-    for(var ruleIndex in valueIndexIgnoreRules)
-    {
-        var currentRule = valueIndexIgnoreRules[ruleIndex];
+    var valueSearchRules = rules.filter(function (rule) {
+        return rule.val !== undefined;
+    });
 
-        // Go through all of the columns in the dataset
-        for(var colIndex=0; colIndex<numCols; colIndex++)
-        {
-            var matched = true;
-            
+    var runValueSearchRules = function(colIndex)
+    {
+        var matched = true;
+        
+        var numSubRules = valueSearchRules.length;
+        for(var i=0; i<numSubRules; i++) {
+            var subRule = valueSearchRules[i];
+
             // Go through each component of the current rule to check for a
             // match.
-            for (var subRuleIndex in currentRule.combined) {
-                var subRule = currentRule.combined[subRuleIndex];
-                var rowIndicies = prepareListOfIndicies(subRule.row);
+            var rowIndicies = prepareListOfIndicies(subRule.row);
 
-                // Only use columns specified by user spec
-                if (rowIndicies === ANY_OPT) {
-                    if(!checkRows(targetRows, subRule, colIndex))
-                        matched = false;
-                } else {
-                    // Find the rows that match the user's selection options.
-                    var ruleRows = rowIndicies.map(function(i){
-                        return targetRows[i];
-                    });
+            // Only use columns specified by user spec
+            if (rowIndicies === ANY_OPT) {
+                if(!checkRows(targetRows, subRule, colIndex))
+                    matched = false;
+            } else {
+                // Find the rows that match the user's selection options.
+                var ruleRows = rowIndicies.map(function (i) {
+                    return targetRows[i];
+                });
 
-                    var targetRow = targetRows[subRule.row];
-                    if(!checkRows(ruleRows, subRule, colIndex))
-                        matched = false;
-                }
+                var targetRow = targetRows[subRule.row];
+                if(!checkRows(ruleRows, subRule, colIndex))
+                    matched = false;
             }
-            
-            if (matched)
-                matchedCols.push(colIndex);
+        }
+
+        if (matched)
+            matchedCols.push(colIndex);
+    };
+
+    var indexRules = rules.filter(function (rule) {
+        return rule.index !== undefined;
+    });
+    var colsToExamineByRule = indexRules.map(function (e) {
+        if(e.index instanceof Array)
+            return e.index;
+        else
+            return [e.index];
+    });
+    var colsToExamine;
+    if (colsToExamineByRule.length > 0) {
+        colsToExamine = colsToExamineByRule.reduce(function(a, b) {
+            return a.concat(b);
+        });
+    } else {
+        colsToExamine = [];
+    }
+    var examineAllCols = colsToExamine.length == 0;
+
+    // Go through all of the columns in the dataset
+    for (var colIndex=0; colIndex<numCols; colIndex++) {
+        if (examineAllCols || colsToExamine.indexOf(colIndex) != -1) {
+            runValueSearchRules(colIndex);
         }
     }
 
@@ -347,10 +436,11 @@ function findColsByCombinedVals(valueIndexIgnoreRules, targetRows)
 **/
 function removeCols(targetRows, cols)
 {
-    return targetRows.map(function(row){
+    return targetRows.map(function (row) {
         var newRow = [];
 
-        for (var i in row) {
+        var numRows = row.length;
+        for (var i=0; i<numRows; i++) {
             if (cols.indexOf(parseInt(i, 10)) === -1) {
                 newRow.push(row[i]);
             }
@@ -374,7 +464,7 @@ function removeCols(targetRows, cols)
  *      original dataset will not be modified.
  * @param {Array} params The specifications to build the rules from. Each
  *      element should of form {index: int}, {col: int, value: primitive}, or
- *      {combined: [{col: int, value: primitive}, ...]}.
+ *      {allOf: [{col: int, value: primitive}, ...]}.
  * @param {function} onSuccess The function to call after a copy of the dataset
  *      has been modified. This function should take a single parameter: the
  *      modified copy of the original dataset.
@@ -385,10 +475,10 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
 
     // Add list of column indicies that the user specified to remove to the
     // actual list of column indicies to remove.
-    var colIndexIgnoreRules = params.filter(function(e){
+    var colIndexIgnoreRules = params.filter(function (e) {
         return e.index !== undefined;
     });
-    var indiciesExplicitlyIgnored = colIndexIgnoreRules.map(function(e){
+    var indiciesExplicitlyIgnored = colIndexIgnoreRules.map(function (e) {
         return e.index;
     });
     colIndiciesToIgnore.push.apply(
@@ -397,7 +487,7 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
     );
 
     // Search for columns to ignore / remove based on having one of many values.
-    var valueIndexIgnoreRules = params.filter(function(e){
+    var valueIndexIgnoreRules = params.filter(function (e) {
         return e.row !== undefined;
     });
     colIndiciesToIgnore.push.apply(
@@ -406,16 +496,20 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
     );
 
     // Search for columns to ignore / remove based on having all of many values.
-    var valueCombinedIgnoreRules = params.filter(function(e){
-        return e.combined !== undefined;
+    var combineRules = params.filter(function (e) {
+        return e.allOf !== undefined;
     });
-    colIndiciesToIgnore.push.apply(
-        colIndiciesToIgnore,
-        findColsByCombinedVals(valueCombinedIgnoreRules, targetRows)
-    );
+    var numCombineRules = combineRules.length;
+    for(var i=0; i<numCombineRules; i++)
+    {
+        colIndiciesToIgnore.push.apply(
+            colIndiciesToIgnore,
+            findColsByCombinedVals(combineRules[i].allOf, targetRows)
+        );
+    }
 
     // Parse any indicies the user specified as a string.
-    colIndiciesToIgnore = colIndiciesToIgnore.map(function(e){
+    colIndiciesToIgnore = colIndiciesToIgnore.map(function (e) {
         return parseInt(e);
     });
 
@@ -442,7 +536,7 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
 function replace(targetRows, params, onSuccess, onError)
 {
     // Generate functions to replace certain strings with others.
-    var replaceFuncs = params.map(function(rule){
+    var replaceFuncs = params.map(function (rule) {
         
         var rows = prepareListOfIndicies(rule.row);
         var cols = prepareListOfIndicies(rule.col);
@@ -468,7 +562,8 @@ function replace(targetRows, params, onSuccess, onError)
         rowIndex = parseInt(rowIndex);
         colIndex = parseInt(colIndex);
 
-        for(var funcIndex in replaceFuncs)
+        var numReplaceFuncs = replaceFuncs.length;
+        for(var funcIndex=0; funcIndex<numReplaceFuncs; funcIndex++)
         {
             target = replaceFuncs[funcIndex](target, rowIndex, colIndex);
         }
@@ -478,10 +573,12 @@ function replace(targetRows, params, onSuccess, onError)
 
     // Run the replace functions on all rows.
     var retVal = [];
-    for (var rowIndex in targetRows) {
+    var numRows = targetRows.length;
+    for (var rowIndex=0; rowIndex<numRows; rowIndex++) {
         var targetRow = targetRows[rowIndex];
         var newRow = [];
-        for (var colIndex in targetRow) {
+        var numCols = targetRow.length;
+        for (colIndex=0; colIndex < numCols; colIndex++) {
             var targetVal = targetRow[colIndex];
             targetVal = runReplaceFuncs(targetVal, rowIndex, colIndex);
             newRow.push(targetVal);
@@ -528,7 +625,7 @@ function interpretStr(targetRows, params, onSuccess, onError)
 
     // Add function to parse boolean values if boolean options are specified.
     if (params.bools) {
-        interpretFuncs.push(function(cell){
+        interpretFuncs.push(function (cell) {
             if(cell === params.bools.falseVal)
                 return false;
             else if(cell === params.bools.trueVal)
@@ -556,7 +653,8 @@ function interpretStr(targetRows, params, onSuccess, onError)
     // Combine all interpret functions into a single high-level interpret
     // function.
     var interpretValue = function (value) {
-        for(var i in interpretFuncs) {
+        var numInterpretFuncs = interpretFuncs.length;
+        for(var i=0; i<numInterpretFuncs; i++) {
             value = interpretFuncs[i](value);
         }
         return value;
@@ -569,11 +667,13 @@ function interpretStr(targetRows, params, onSuccess, onError)
     // Run the interpret function on all cells in table (elements in Array).
     var retVal = [];
 
-    for (var rowIndex in targetRows) {
+    var numRows = targetRows.length;
+    for (var rowIndex=0; rowIndex<numRows; rowIndex++) {
         var targetRow = targetRows[rowIndex];
         if (rows === ANY_OPT || rows.indexOf(rowIndex) != -1) {
             var newRow = [];
-            for (var colIndex in targetRow) {
+            var numCols = targetRow.length;
+            for (var colIndex=0; colIndex<numCols; colIndex++) {
                 var targetVal = targetRow[colIndex];
                 if (cols === ANY_OPT || cols.indexOf(colIndex) != -1) {
                     targetVal = interpretValue(targetVal);
@@ -615,10 +715,12 @@ function transpose(targetRows, params, onSuccess, onError)
     for(var i=0; i<numCols; i++)
         retVal.push([]);
 
-    for(var rowIndex in targetRows) {
+    var numRows = targetRows.length;
+    for(var rowIndex=0; rowIndex<numRows; rowIndex++) {
         var targetRow = targetRows[rowIndex];
         
-        for(colIndex in targetRow) {
+        var numCols = targetRow.length;
+        for(var colIndex=0; colIndex<numCols; colIndex++) {
             retVal[colIndex].push(targetRow[colIndex]);
         }
     }

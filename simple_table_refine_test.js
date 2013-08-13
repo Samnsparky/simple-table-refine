@@ -26,9 +26,38 @@ exports.testIgnoreRowIfIndex = function(test)
     ];
     var testOperation = {
         operation: 'ignoreRowIf',
-        param: [
-            {'index':1}
-        ]
+        param: [{index:1}]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing rows by testing for a given value in a given column.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreRowIfVal = function(test)
+{
+    var testInput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2'],
+        ['targetVal1', 'throw this row out', 'targetVal2'],
+        ['targetVal1', 'throw this out', 'notTargetVal3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2']
+    ];
+    var testOperation = {
+        operation: 'ignoreRowIf',
+        param: [{col: 0, val: 'targetVal1'}]
     };
 
     simple_table_refine.refine(
@@ -50,23 +79,23 @@ exports.testIgnoreRowIfIndex = function(test)
  *
  * @param {nodeunit.test} test The test this routine is running under.
 **/
-exports.testIgnoreRowIfVal = function(test)
+exports.testIgnoreRowIfValCombined = function(test)
 {
     var testInput = [
         ['notTargetVal1', 'dont touch me', 'targetVal2'],
         ['targetVal1', 'throw this row out', 'targetVal2'],
-        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+        ['targetVal1', 'dont touch me either', 'notTargetVal3']
     ];
     var expectedOutput = [
         ['notTargetVal1', 'dont touch me', 'targetVal2'],
-        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+        ['targetVal1', 'dont touch me either', 'notTargetVal3']
     ];
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'combined': [
-                {'col':0, 'val': 'targetVal1'},
-                {'col':2, 'val': 'targetVal2'}
+            {allOf: [
+                {col: 0, val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'}
             ]}
         ]
     };
@@ -105,9 +134,9 @@ exports.testIgnoreRowIfValManyCols = function(test)
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'combined': [
-                {'col':[0,1], 'val': 'targetVal1'},
-                {'col':2, 'val': 'targetVal2'}
+            {allOf: [
+                {col: [0,1], val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'}
             ]}
         ]
     };
@@ -146,9 +175,9 @@ exports.testIgnoreRowIfValAny = function(test)
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'combined': [
-                {'col': 'any', 'val': 'targetVal1'},
-                {'col': 2, 'val': 'targetVal2'}
+            {allOf: [
+                {col: 'any', val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'}
             ]}
         ]
     };
@@ -188,9 +217,89 @@ exports.testIgnoreRowIfValAnyDefault = function(test)
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'combined': [
-                {'val': 'targetVal1'},
-                {'col': 2, 'val': 'targetVal2'}
+            {allOf: [
+                {val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'}
+            ]}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing a specific row by testing for given values in any column.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreRowCombinedWithIndex = function(test)
+{
+    var testInput = [
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3'],
+        ['targetVal1', 'throw this row out', 'targetVal2'],
+        ['targetVal1', 'dont touch me', 'targetVal2'],
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3'],
+        ['targetVal1', 'dont touch me', 'targetVal2'],
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+    ];
+    var testOperation = {
+        operation: 'ignoreRowIf',
+        param: [
+            {allOf: [
+                {val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'},
+                {index: 1}
+            ]}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing a specific rows by testing for given values in any column.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreRowCombinedWithIndicies = function(test)
+{
+    var testInput = [
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3'],
+        ['targetVal1', 'throw this row out', 'targetVal2'],
+        ['targetVal1', 'dont touch me', 'targetVal2'],
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3'],
+        ['targetVal1', 'dont touch me', 'targetVal2'],
+        ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+    ];
+    var testOperation = {
+        operation: 'ignoreRowIf',
+        param: [
+            {allOf: [
+                {val: 'targetVal1'},
+                {col: 2, val: 'targetVal2'},
+                {index: [0,1]}
             ]}
         ]
     };
@@ -227,8 +336,8 @@ exports.testIgnoreRowIfValLoose = function(test)
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'col':0, 'val': 'targetVal1'},
-            {'col':2, 'val': 'targetVal2'}
+            {col: 0, val: 'targetVal1'},
+            {col: 2, val: 'targetVal2'}
         ]
     };
 
@@ -265,8 +374,8 @@ exports.testIgnoreRowIfValLooseAny = function(test)
     var testOperation = {
         operation: 'ignoreRowIf',
         param: [
-            {'col':'any', 'val': 'targetVal1'},
-            {'col':2, 'val': 'targetVal2'}
+            {col: 'any', val: 'targetVal1'},
+            {col: 2, val: 'targetVal2'}
         ]
     };
 
@@ -301,7 +410,7 @@ exports.testIgnoreColIfIndex = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'index':0}
+            {index: 0}
         ]
     };
 
@@ -315,6 +424,42 @@ exports.testIgnoreColIfIndex = function(test)
     );
 };
 
+
+/**
+ * Test removing colums by testing for a given value in given rows
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreColIfVal = function(test)
+{
+    var testInput = [
+        ['0', 'notTargetVal1', 'dont touch me', '0'],
+        ['1', 'targetVal', 'get rid of that row', '1'],
+        ['2', 'notTargetVal2', 'dont touch me either', '3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me'],
+        ['targetVal', 'get rid of that row'],
+        ['notTargetVal2', 'dont touch me either']
+    ];
+    var testOperation = {
+        operation: 'ignoreColIf',
+        param: [
+            {row: 1, val: '1'}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
 /**
  * Test removing cols by testing for given values in given rows joined by AND.
  *
@@ -323,7 +468,7 @@ exports.testIgnoreColIfIndex = function(test)
  *
  * @param {nodeunit.test} test The test this routine is running under.
 **/
-exports.testIgnoreColIfVal = function(test)
+exports.testIgnoreColIfValCombined = function(test)
 {
     var testInput = [
         ['0', 'notTargetVal1', 'dont touch me', '0'],
@@ -338,9 +483,95 @@ exports.testIgnoreColIfVal = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'combined': [
-                {'row':1, 'val': '1'},
-                {'row':2, 'val': '2'}
+            {allOf: [
+                {row: 1, val: '1'},
+                {row: 2, val: '2'}
+            ]}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing specific cols by testing for given values in given rows.
+ *
+ * Test removing colums by testing for given values in given rows given a set of
+ * rules, all of which must be fulfilled before the column is removed. However,
+ * only look at a certain column for removal.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreColIfValCombinedIndex = function(test)
+{
+    var testInput = [
+        ['0', 'notTargetVal1', 'dont touch me', '0'],
+        ['1', 'targetVal', 'get rid of that row', '1'],
+        ['2', 'notTargetVal2', 'dont touch me either', '2']
+    ];
+    var expectedOutput = [
+        ['0', 'notTargetVal1', 'dont touch me'],
+        ['1', 'targetVal', 'get rid of that row'],
+        ['2', 'notTargetVal2', 'dont touch me either']
+    ];
+    var testOperation = {
+        operation: 'ignoreColIf',
+        param: [
+            {allOf: [
+                {row: 1, val: '1'},
+                {row: 2, val: '2'},
+                {index: 3}
+            ]}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing specific cols by testing for given values in given rows.
+ *
+ * Test removing colums by testing for given values in given rows given a set of
+ * rules, all of which must be fulfilled before the column is removed. However,
+ * only look at certain columns for removal.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreColIfValCombinedIndicies = function(test)
+{
+    var testInput = [
+        ['0', 'notTargetVal1', 'dont touch me', '0'],
+        ['1', 'targetVal', 'get rid of that row', '1'],
+        ['2', 'notTargetVal2', 'dont touch me either', '2']
+    ];
+    var expectedOutput = [
+        ['0', 'notTargetVal1', 'dont touch me'],
+        ['1', 'targetVal', 'get rid of that row'],
+        ['2', 'notTargetVal2', 'dont touch me either']
+    ];
+    var testOperation = {
+        operation: 'ignoreColIf',
+        param: [
+            {allOf: [
+                {row: 1, val: '1'},
+                {row: 2, val: '2'},
+                {index: [2,3]}
             ]}
         ]
     };
@@ -380,9 +611,9 @@ exports.testIgnoreColIfVals = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'combined': [
-                {'row':[0,1], 'val': '1'},
-                {'row':2, 'val': '2'}
+            {allOf: [
+                {row: [0,1], val: '1'},
+                {row: 2, val: '2'}
             ]}
         ]
     };
@@ -422,10 +653,10 @@ exports.testIgnoreColIfValAny = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'combined': [
-                {'row': 'any', 'val': '1'},
-                {'row': 2, 'val': '2'}
-            ]}
+            {allOf: [
+                {row: 'any', val: '1'},
+                {row: 2, val: '2'}
+            ]} 
         ]
     };
 
@@ -463,8 +694,8 @@ exports.testIgnoreColIfValLoose = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'row':1, 'val': '1'},
-            {'row':2, 'val': '2'}
+            {row: 1, val: '1'},
+            {row: 2, val: '2'}
         ]
     };
 
@@ -503,8 +734,8 @@ exports.testIgnoreColIfValsLoose = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'row':[0,1], 'val': '1'},
-            {'row':2, 'val': '2'}
+            {row: [0,1], val: '1'},
+            {row: 2, val: '2'}
         ]
     };
 
@@ -543,8 +774,8 @@ exports.testIgnoreColIfValLooseAny = function(test)
     var testOperation = {
         operation: 'ignoreColIf',
         param: [
-            {'row':'any', 'val': '1'},
-            {'row':2, 'val': '2'}
+            {row: 'any', val: '1'},
+            {row: 2, val: '2'}
         ]
     };
 
@@ -582,8 +813,8 @@ exports.testReplaceAnyRow = function(test)
     var testOperation = {
             operation: 'replace',
             param: [
-                {'orig':'ND', 'new':'1', 'row':'any', 'col':1},
-                {'orig':'', 'new':'0', 'row': 'any', 'col':2}
+                {orig: 'ND', new: '1', row: 'any', col: 1},
+                {orig: '', new: '0', row: 'any', col: 2}
             ]
     };
 
@@ -621,8 +852,8 @@ exports.testReplaceAnyRowManyCols = function(test)
     var testOperation = {
             operation: 'replace',
             param: [
-                {'orig':'ND', 'new':'1', 'row':'any', 'col':[1, 2]},
-                {'orig':'', 'new':'0', 'row': 'any', 'col':2}
+                {orig: 'ND', new: '1', row: 'any', col: [1, 2]},
+                {orig: '', new: '0', row: 'any', col: 2}
             ]
     };
 
@@ -660,8 +891,8 @@ exports.testReplaceAnyCol = function(test)
     var testOperation = {
             operation: 'replace',
             param: [
-                {'orig':'ND', 'new':'1', 'row':1, 'col':'any'},
-                {'orig':'', 'new':'0', 'row':2, 'col':'any'}
+                {orig: 'ND', new: '1', row: 1, col: 'any'},
+                {orig: '', new: '0', row: 2, col: 'any'}
             ]
     };
 
@@ -699,8 +930,8 @@ exports.testReplaceAnyColManyRows = function(test)
     var testOperation = {
             operation: 'replace',
             param: [
-                {'orig':'ND', 'new':'1', 'row':[0,1], 'col':'any'},
-                {'orig':'', 'new':'0', 'row':2, 'col':'any'}
+                {orig: 'ND', new: '1', row: [0,1], col: 'any'},
+                {orig: '', new: '0', row: 2, col: 'any'}
             ]
     };
 
@@ -762,9 +993,9 @@ exports.testInterpretStrBoolean = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'bools': {'falseVal': 'N', 'trueVal': 'Y'},
-            'row': 'any',
-            'col': 'any'
+            bools: {falseVal: 'N', trueVal: 'Y'},
+            row:'any',
+            col: 'any'
         }
     };
     
@@ -791,9 +1022,9 @@ exports.testInterpretStrDate = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'dates': 'MM/DD/YYYY',
-            'row': 'any',
-            'col': 'any'
+            dates: 'MM/DD/YYYY',
+            row:'any',
+            col: 'any'
         }
     };
 
@@ -823,9 +1054,9 @@ exports.testInterpretStrInteger = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'numbers': true,
-            'row': 'any',
-            'col': 'any'
+            numbers: true,
+            row:'any',
+            col: 'any'
         }
     };
 
@@ -861,9 +1092,9 @@ exports.testInterpretStrIntegerAnyCol = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'numbers': true,
-            'row': 1,
-            'col': 'any'
+            numbers: true,
+            row: 1,
+            col: 'any'
         }
     };
 
@@ -902,9 +1133,9 @@ exports.testInterpretStrIntegerAnyColManyRows = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'numbers': true,
-            'row': [1,2],
-            'col': 'any'
+            numbers: true,
+            row: [1,2],
+            col: 'any'
         }
     };
 
@@ -941,9 +1172,9 @@ exports.testInterpretStrIntegerAnyRow = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'numbers': true,
-            'row': 'any',
-            'col': 0
+            numbers: true,
+            row: 'any',
+            col: 0
         }
     };
 
@@ -980,9 +1211,9 @@ exports.testInterpretStrIntegerAnyRowManyCols = function(test)
     var testOperation = {
         operation: 'interpretStr',
         param: {
-            'numbers': true,
-            'row': 'any',
-            'col': [0,2]
+            numbers: true,
+            row:'any',
+            col: [0,2]
         }
     };
 
@@ -1021,7 +1252,7 @@ exports.testManyOperationRefinement = function(test)
 
     var testOperations = [
         {operation: 'transpose'},
-        {operation: 'interpretStr', param: {'numbers': true, 'row': 1}}
+        {operation: 'interpretStr', param: {'numbers': true, row:1}}
     ];
 
     simple_table_refine.refine(

@@ -1,4 +1,4 @@
-h1. table_refine
+h1. simple-table-refine
 
 Micro-library to refine, clean, and transform tabular data (2D Array, Array of Array, etc).
 
@@ -11,10 +11,30 @@ Released under the "MIT License":http://opensource.org/licenses/MIT.
 
 h2. Installation
 
+@npm install simple-table-refine@
 
 
 h2. Quickstart
 
+bc..var simple_table_refine = require('simple-table-refine');
+var testInput = [
+    ['notTargetVal1', 'dont touch me', 'targetVal2'],
+    ['targetVal1', 'throw this row out', 'targetVal2'],
+    ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+];
+var expectedOutput = [
+    ['notTargetVal1', 'dont touch me', 'targetVal2'],
+    ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
+];
+var testOperation = {
+    operation: 'ignoreRowIf',
+    param: [
+        {combined: [
+            {col:0, val: 'targetVal1'},
+            {col:2, val: 'targetVal2'}
+        ]}
+    ]
+};
 
 
 h2. Background and Motivation
