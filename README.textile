@@ -22,7 +22,7 @@ h2. Installation
 
 h2. Quickstart
 
-bc..var simple_table_refine = require('simple-table-refine');
+bc.. var simple_table_refine = require('simple-table-refine');
 
 var testInput = [
     ['notTargetVal1', 'dont touch me', 'targetVal2'],
@@ -65,6 +65,32 @@ simple_table_refine.refine(
         console.log(errDescription);
     },
 );
+
+
+h2. Status of the project
+
+Existing features are tested and the interfaces to them will remain the same through the 0.* releases. However, this micro-library remains under active development. Have an idea of something you want to see? Open an issue on the GitHub repository issue tracker.
+
+
+h2. Development Environment and Standards
+
+This project maintains 80% code coverage and conforms to Google's JavaScript Style Guidelines. All inline documentation should follow the jsDoc standard.
+
+
+h2. Testing
+
+@ nodeunit nodeunit simple_table_refine_test.js @
+
+You may need to install "nodeunit":https://github.com/caolan/nodeunit first.
+
+
+h2. Technologies and Resources Used
+
+* "async":https://github.com/caolan/async
+* "Moment.js":http://momentjs.com/
+* "nodeunit":https://github.com/caolan/nodeunit
+
+Basically "caolan":http://caolanmcmahon.com/ is awesome.
 
 
 h2. API
@@ -128,29 +154,3 @@ h3. interpretStr
 h3. transpose
 
 *description*: Runs a matrix transpose operation. This operation does not take any parameters (no value should be provided for param).
-
-
-h2. Status of the project
-
-Existing features are tested and the interfaces to them will remain the same through the 0.* releases. However, this micro-library remains under active development. Have an idea of something you want to see? Open an issue on the GitHub repository issue tracker.
-
-
-h2. Development Environment and Standards
-
-This project maintains 80% code coverage and conforms to Google's JavaScript Style Guidelines. All inline documentation should follow the jsDoc standard.
-
-
-h2. Testing
-
-@ nodeunit nodeunit simple_table_refine_test.js @
-
-You may need to install "nodeunit":https://github.com/caolan/nodeunit first.
-
-
-h2. Technologies and Resources Used
-
-* "async":https://github.com/caolan/async
-* "Moment.js":http://momentjs.com/
-* "nodeunit":https://github.com/caolan/nodeunit
-
-Basically "caolan":http://caolanmcmahon.com/ is awesome.
