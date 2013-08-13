@@ -1,0 +1,34 @@
+{
+    "general":[
+        {
+            "operation": "ignoreRowIf",
+            "param": [
+                {"col":0, "val": "Section"}
+            ]
+        },
+        {
+            "operation": "ignoreColIf",
+            "param": [
+                {"index": 0}
+            ]
+        },
+        {
+            "operation": "replace",
+            "param": [
+                {"orig":"", "new":"0"}
+            ]
+        },
+        {
+            "operation": "transpose",
+            "param": true
+        },
+        {
+            "operation": "interpretStr",
+            "param": {
+                "dates": "MM/DD/YYYY",
+                "bools": {"falseVal": "N", "trueVal": "Y"},
+                "numbers": true
+            }
+        }
+    ]
+}
