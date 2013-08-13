@@ -60,7 +60,7 @@ function RuleCombiner(combineWithAnd)
  *      Array, or undefined.
  * @return {Array} The fully qualified version of the user's input.
 **/
-function prepareListOfIndicies(input)
+function prepareListOfIndices(input)
 {
     if(input === undefined || input === ANY_OPT)
         return ANY_OPT;
@@ -120,7 +120,7 @@ function createKeepRowValFuncs(ignoreValueRules)
         var targetCol = rule.col;
         var targetVal = rule.val;
 
-        var targetCols = prepareListOfIndicies(targetCol);
+        var targetCols = prepareListOfIndices(targetCol);
 
         if (targetCols === ANY_OPT) {
             return function (row, rowIndex) {
@@ -299,19 +299,19 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
     for(var ruleIndex=0; ruleIndex<numRules; ruleIndex++)
     {
         var currentRule = valueIndexIgnoreRules[ruleIndex];
-        var rowIndicies = prepareListOfIndicies(currentRule.row);
+        var rowIndices = prepareListOfIndices(currentRule.row);
 
         // Either check all rows or check user specified set of rows.
-        if (rowIndicies === ANY_OPT) {
+        if (rowIndices === ANY_OPT) {
             checkRows(currentRule, targetRows);
         } else {
             var numRows = targetRows.length;
-            rowIndicies = rowIndicies.filter(function (i) {
+            rowIndices = rowIndices.filter(function (i) {
                 return i < numRows;
             });
 
             // Find the rows that match the user's selection options.
-            var ruleRows = rowIndicies.map(function (i) {
+            var ruleRows = rowIndices.map(function (i) {
                 return targetRows[i];
             });
             checkRows(currentRule, ruleRows);
@@ -333,7 +333,7 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
  *      look for the value in respectively.
  * @param {Array} targetRows Array of Array (dataset, table, 2D array) to find
  *      the columns in.
- * @return {Array} An Array of integer indicies, each an index of a column that
+ * @return {Array} An Array of integer indices, each an index of a column that
  *      satisfied all of the provided rules.
 **/
 function findColsByCombinedVals(rules, targetRows)
@@ -371,15 +371,15 @@ function findColsByCombinedVals(rules, targetRows)
 
             // Go through each component of the current rule to check for a
             // match.
-            var rowIndicies = prepareListOfIndicies(subRule.row);
+            var rowIndices = prepareListOfIndices(subRule.row);
 
             // Only use columns specified by user spec
-            if (rowIndicies === ANY_OPT) {
+            if (rowIndices === ANY_OPT) {
                 if(!checkRows(targetRows, subRule, colIndex))
                     matched = false;
             } else {
                 // Find the rows that match the user's selection options.
-                var ruleRows = rowIndicies.map(function (i) {
+                var ruleRows = rowIndices.map(function (i) {
                     return targetRows[i];
                 });
 
@@ -431,7 +431,7 @@ function findColsByCombinedVals(rules, targetRows)
  * without those values. The original dataset will be left unchanged.
  *
  * @param {Array} targetRows The Array of Array of Object to operate on.
- * @param {Array} cols An Array of integer column indicies to remove.
+ * @param {Array} cols An Array of integer column indices to remove.
  * @return {Array} A copy of targetRows without the specified columns.
 **/
 function removeCols(targetRows, cols)
@@ -471,27 +471,27 @@ function removeCols(targetRows, cols)
 **/
 function ignoreColIf(targetRows, params, onSuccess, onError)
 {
-    var colIndiciesToIgnore = [];
+    var colIndicesToIgnore = [];
 
-    // Add list of column indicies that the user specified to remove to the
-    // actual list of column indicies to remove.
+    // Add list of column indices that the user specified to remove to the
+    // actual list of column indices to remove.
     var colIndexIgnoreRules = params.filter(function (e) {
         return e.index !== undefined;
     });
-    var indiciesExplicitlyIgnored = colIndexIgnoreRules.map(function (e) {
+    var indicesExplicitlyIgnored = colIndexIgnoreRules.map(function (e) {
         return e.index;
     });
-    colIndiciesToIgnore.push.apply(
-        colIndiciesToIgnore,
-        indiciesExplicitlyIgnored
+    colIndicesToIgnore.push.apply(
+        colIndicesToIgnore,
+        indicesExplicitlyIgnored
     );
 
     // Search for columns to ignore / remove based on having one of many values.
     var valueIndexIgnoreRules = params.filter(function (e) {
         return e.row !== undefined;
     });
-    colIndiciesToIgnore.push.apply(
-        colIndiciesToIgnore,
+    colIndicesToIgnore.push.apply(
+        colIndicesToIgnore,
         findColsByVal(valueIndexIgnoreRules, targetRows)
     );
 
@@ -502,19 +502,19 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
     var numCombineRules = combineRules.length;
     for(var i=0; i<numCombineRules; i++)
     {
-        colIndiciesToIgnore.push.apply(
-            colIndiciesToIgnore,
+        colIndicesToIgnore.push.apply(
+            colIndicesToIgnore,
             findColsByCombinedVals(combineRules[i].allOf, targetRows)
         );
     }
 
-    // Parse any indicies the user specified as a string.
-    colIndiciesToIgnore = colIndiciesToIgnore.map(function (e) {
+    // Parse any indices the user specified as a string.
+    colIndicesToIgnore = colIndicesToIgnore.map(function (e) {
         return parseInt(e);
     });
 
-    // Remove the columns at the specified indicies.
-    onSuccess(removeCols(targetRows, colIndiciesToIgnore));
+    // Remove the columns at the specified indices.
+    onSuccess(removeCols(targetRows, colIndicesToIgnore));
 }
 
 
@@ -538,8 +538,8 @@ function replace(targetRows, params, onSuccess, onError)
     // Generate functions to replace certain strings with others.
     var replaceFuncs = params.map(function (rule) {
         
-        var rows = prepareListOfIndicies(rule.row);
-        var cols = prepareListOfIndicies(rule.col);
+        var rows = prepareListOfIndices(rule.row);
+        var cols = prepareListOfIndices(rule.col);
         
         return function (target, rowIndex, colIndex) {
             if(rows !== ANY_OPT && rows.indexOf(rowIndex) == -1)
@@ -661,8 +661,8 @@ function interpretStr(targetRows, params, onSuccess, onError)
     };
 
     // Parse user options for which rows and columns to operate on.
-    var rows = prepareListOfIndicies(params.row);
-    var cols = prepareListOfIndicies(params.col);
+    var rows = prepareListOfIndices(params.row);
+    var cols = prepareListOfIndices(params.col);
 
     // Run the interpret function on all cells in table (elements in Array).
     var retVal = [];

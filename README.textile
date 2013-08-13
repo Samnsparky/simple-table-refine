@@ -1,12 +1,18 @@
 h1. simple-table-refine
 
-Micro-library to refine, clean, and transform tabular data (2D Array, Array of Array, etc).
+Micro-library to refine, clean, transform, and sanitize tabular data (2D Array, Array of Array, etc).
+
 
 h2. Authors and License
 
 (c) 2013 "Sam Pottinger":http://gleap.org
 (c) 2013 University of Colorado Boulder "CU Language Project":http://psych.colorado.edu/~colungalab/CULanguage/CU-LANGUAGE.html
 Released under the "MIT License":http://opensource.org/licenses/MIT.
+
+
+h2. Background and Motivation
+
+Data refinement takes longer than it should and frequently involves something tabular. Moreover, sometimes cleaning just means removing some rows, replacing some values, and interpreting some strings as numbers, boolean values, or dates. This micro-library ensures that those simple tasks, operations frequently re-implemented by data / computer scientists for each project, remain simple and free of repeat work.
 
 
 h2. Installation
@@ -17,15 +23,18 @@ h2. Installation
 h2. Quickstart
 
 bc..var simple_table_refine = require('simple-table-refine');
+
 var testInput = [
     ['notTargetVal1', 'dont touch me', 'targetVal2'],
     ['targetVal1', 'throw this row out', 'targetVal2'],
     ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
 ];
+
 var expectedOutput = [
     ['notTargetVal1', 'dont touch me', 'targetVal2'],
     ['notTargetVal2', 'dont touch me either', 'notTargetVal3']
 ];
+
 var testOperation = {
     operation: 'ignoreRowIf',
     param: [
@@ -36,15 +45,91 @@ var testOperation = {
     ]
 };
 
+// Handle errors with throw new Error
+simple_table_refine.refine(
+    testOperation,
+    testInput,
+    function (actualOutput) {
+        console.log(actualOutput);
+    }
+);
 
-h2. Background and Motivation
+// Handle errors with error handler
+simple_table_refine.refine(
+    testOperation,
+    testInput,
+    function (actualOutput) {
+        console.log(actualOutput);
+    },
+    function (errDescription) {
+        console.log(errDescription);
+    },
+);
 
 
+h2. API
+
+h3. refine(operation, targetRows, onSuccess, onError)
+
+*short description*: Execute a refinement operation on the given dataset.
+
+*long description*: Perform a refinement operation on the given dataset (table, 2D Array, Array of Array, etc.). The provided operation should have an operation attribute (String) and param attribute (Object or Array depending on the value of the operation attribute). Operation can also accept an Array of Object and will execute each operation in the order emitted from that iterable.
+
+*params*:
+
+* {Object or Array} _operation_ Description of the operation(s) to execute. Pass an Object for running a single operation or provide an Object Array for running many operations at once. Each Object should have a String attribute called "operation" describing the type of operation to execute as well as a "param" attribute that should be an Object or Array depending on the operation attribute. For available operations and corresponding params, see the operations section below.
+* {Array} _targetRows_ The Array of Array (dataset, table, 2D array) to operate on. A copy of this dataset will be made and this original dataset will not be modified.
+* {function} _onSuccess_ The function to call after the operation finishes. That function should take a single parameter for an Array of Array that will be a modified copy of the original dataset.
+* {function} _onError_ An optional parameter for a function to call if an error is encountered during the refinement operation. This function should take a single String argument that describes the error encountered. If this parameter is not provided, an Error will be thrown if an error is encountered.
 
 
-h2. Full API
+h2. Available refinement / cleaning operations
+
+h3. ignoreRowIf
+
+*description*: Removes a row from the tabular data source if it meets the criteria provided in params.
+*param*: An array of the following:
+
+* { index: _row index to remove_ } // Remove the nth row. The first row is the 0th row.
+* { index: [ _row index_, _row index_, ... ]} // Remove the rows at each provided index.
+* { col: _column to look for this value in_, val: _val to look for_ } // Remove rows that have the given value at the given column. Will look for this value in all columns if no column is specified or if 'any' is passed.
+* { col: [ _column index_, _column index_ ], val: _val to look for_ } // Remove rows that have the given value in any of the provided columns.
+* { allOf: [ _rules_ ] } // Remove rows that meet all of the provided rules where rules is a collection of the types of rules preceding this one. If an index rule is provided in the provided Array, only rows of that index will be considered for removal.
 
 
+h3. ignoreColIf
+
+*description*: Removes a column from the tabular data source if it meets the criteria provided in params.
+*param*: An array of the following:
+
+* { index: _column index to remove_ } // Remove the nth column. The first column is the 0th row.
+* { index: [ _column index_, _column index_, ... ]} // Remove the columns at each provided index.
+* { row: _row to look for this value in_, val: _val to look for_ } // Remove columns that have the given value at the given row. Will look for this value in all rows if no row is specified or if 'any' is passed.
+* { row: [ _column index_, _column index_ ], val: _val to look for_ } // Remove columns that have the given value in any of the provided rows.
+* { allOf: [ _rules_ ] } // Remove columns that meet all of the provided rules where rules is a collection of the types of rules preceding this one. If an index rule is provided in the provided Array, only columns of that index will be considered for removal.
+
+
+h3. replace
+
+*description*: 
+*param*: 
+
+
+h3. interpretStr
+
+*description*: 
+*param*: 
+
+
+h3. transpose
+
+*description*: 
+*param*:
+
+
+h2. Status of the project
+
+Existing features are tested and the interfaces to them will remain the same through the 0.* releases. However, this micro-library remains under active development. Have an idea of something you want to see? Open an issue on the GitHub repository issue tracker.
 
 
 h2. Development Environment and Standards

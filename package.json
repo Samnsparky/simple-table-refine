@@ -1,7 +1,7 @@
 {
     "name": "simple-table-refine",
     "version": "0.0.1",
-    "description": "Utility providing very simple 2D Array refinement / cleaning.",
+    "description": "Utility providing very simple 2D Array refinement, cleaning, and sanitization.",
     "keywords": [
         "table",
         "2D",
@@ -12,7 +12,8 @@
         "clean",
         "cleaning",
         "filter",
-        "transpose"
+        "transpose",
+        "sanitization"
     ],
     "license": "MIT",
     "author":{

@@ -280,7 +280,7 @@ exports.testIgnoreRowCombinedWithIndex = function(test)
  *
  * @param {nodeunit.test} test The test this routine is running under.
 **/
-exports.testIgnoreRowCombinedWithIndicies = function(test)
+exports.testIgnoreRowCombinedWithIndices = function(test)
 {
     var testInput = [
         ['notTargetVal2', 'dont touch me either', 'notTargetVal3'],
