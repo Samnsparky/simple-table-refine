@@ -6,7 +6,7 @@ Node.js micro-library to refine, clean, transform, and sanitize tabular data (2D
 h2. Authors and License
 
 (c) 2013 "Sam Pottinger":http://gleap.org
-(c) 2013 University of Colorado Boulder "CU Language Project":http://psych.colorado.edu/~colungalab/CULanguage/CU-LANGUAGE.html
+(c) 2013 "CU Language Project":http://psych.colorado.edu/~colungalab/CULanguage/CU-LANGUAGE.html at the "University of Colorado, Boulder":http://colorado.edu/
 Released under the "MIT License":http://opensource.org/licenses/MIT.
 
 
