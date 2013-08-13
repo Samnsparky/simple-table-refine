@@ -1055,7 +1055,7 @@ exports.testInterpretStrInteger = function(test)
         operation: 'interpretStr',
         param: {
             numbers: true,
-            row:'any',
+            row: 'any',
             col: 'any'
         }
     };

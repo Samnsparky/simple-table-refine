@@ -1,6 +1,6 @@
 h1. simple-table-refine
 
-Micro-library to refine, clean, transform, and sanitize tabular data (2D Array, Array of Array, etc).
+Node.js micro-library to refine, clean, transform, and sanitize tabular data (2D Array, Array of Array, etc).
 
 
 h2. Authors and License
@@ -90,11 +90,11 @@ h3. ignoreRowIf
 *description*: Removes a row from the tabular data source if it meets the criteria provided in params.
 *param*: An array of the following:
 
-* { index: _row index to remove_ } // Remove the nth row. The first row is the 0th row.
-* { index: [ _row index_, _row index_, ... ]} // Remove the rows at each provided index.
-* { col: _column to look for this value in_, val: _val to look for_ } // Remove rows that have the given value at the given column. Will look for this value in all columns if no column is specified or if 'any' is passed.
-* { col: [ _column index_, _column index_ ], val: _val to look for_ } // Remove rows that have the given value in any of the provided columns.
+* { index: _row index(ices) to remove_ } // Remove the nth row. The first row is the 0th row.The value for index (_row index to remove_) can also be an Array of indices to remove instead of a single Number.
+* { col: _column index(ices) to look in for this value_, val: _val to look for_ } // Remove rows that have the given value at the given column. Will look for this value in all columns if no column is specified or if 'any' is passed. The value for col (_column to look in for this value_) can be also be an Array of row indices to examine instead of a single Number.
 * { allOf: [ _rules_ ] } // Remove rows that meet all of the provided rules where rules is a collection of the types of rules preceding this one. If an index rule is provided in the provided Array, only rows of that index will be considered for removal.
+
+The row will be removed if any of these rules are satisfied.
 
 
 h3. ignoreColIf
@@ -102,29 +102,32 @@ h3. ignoreColIf
 *description*: Removes a column from the tabular data source if it meets the criteria provided in params.
 *param*: An array of the following:
 
-* { index: _column index to remove_ } // Remove the nth column. The first column is the 0th row.
-* { index: [ _column index_, _column index_, ... ]} // Remove the columns at each provided index.
-* { row: _row to look for this value in_, val: _val to look for_ } // Remove columns that have the given value at the given row. Will look for this value in all rows if no row is specified or if 'any' is passed.
-* { row: [ _column index_, _column index_ ], val: _val to look for_ } // Remove columns that have the given value in any of the provided rows.
+* { index: _column index(ices) to remove_ } // Remove the nth column. The first column is the 0th row. The value for index (_column index to remove_) can also be an Array of indices to remove instead of a single Number.
+* { row: _row index(ices) to look in for this value_, val: _val to look for_ } // Remove columns that have the given value at the given row. Will look for this value in all rows if no row is specified or if 'any' is passed. The value for row (_row to look in for this value_) can be also be an Array of row indices to examine instead of a single Number.
 * { allOf: [ _rules_ ] } // Remove columns that meet all of the provided rules where rules is a collection of the types of rules preceding this one. If an index rule is provided in the provided Array, only columns of that index will be considered for removal.
+
+The column will be removed if any of these rules are satisfied.
 
 
 h3. replace
 
-*description*: 
+*description*: Replaces the contents of a cell / element if it contains a certain value.
 *param*: 
+
+* { orig: _the value to look for_, new: _the value to insert instead_, row: _row index(ices) to look in for the orig value_, col: _column index(ices) to look in for the orig value_} // The row and col attributes are optional and can accept an Array of Numbers or 'all' instead of a single Number. An Array of Numbers for row specifies which rows to look in for orig and an Array of Numbers for a col specifies which columns to look in for orig. Similarly, 'all' passed for row will have this library examine all rows and 'all' passed for col will have this library examine all columns.
 
 
 h3. interpretStr
 
-*description*: 
+*description*: Interprets the String (text) contents of cells / entities as a Number, Date, or Boolean value (true / false).
 *param*: 
+
+* { numbers: _true to convert Strings to numbers_, bools: {falseVal: _value to convert to false_, trueVal: _value to convert to true_ }, dates: _date parse string_, row: _row index(ices) to interpret_, col: _column index(ices) to interpret_ } // All attributes are optional. If the numbers, bools, and / or dates attributes are not present, the library will not convert Strings to numbers, bools, and dates respectively. If bools is provided, the value for the attribute must have a falseVal attribute (the value to convert to false) and trueVal attribute (the value to convert to true). Likewise, the value for the dates attribute should be a "moment-compatible date format String":http://momentjs.com/. The row and column attributes can be a single Number, Array of Numbers, 'all' as a String, or undefined (which defaults to the same behavior as passing 'all'). A single number will have the library examine only a row or column of that index, an Array will have the library only interpret strings in the set of rows / columns of that indices, and 'all' / undefined will have the library examine all rows / columns.
 
 
 h3. transpose
 
-*description*: 
-*param*:
+*description*: Runs a matrix transpose operation. This operation does not take any parameters (no value should be provided for param).
 
 
 h2. Status of the project
@@ -134,12 +137,20 @@ Existing features are tested and the interfaces to them will remain the same thr
 
 h2. Development Environment and Standards
 
-
+This project maintains 80% code coverage and conforms to Google's JavaScript Style Guidelines. All inline documentation should follow the jsDoc standard.
 
 
 h2. Testing
 
+@ nodeunit nodeunit simple_table_refine_test.js @
+
+You may need to install "nodeunit":https://github.com/caolan/nodeunit first.
 
 
 h2. Technologies and Resources Used
 
+* "async":https://github.com/caolan/async
+* "Moment.js":http://momentjs.com/
+* "nodeunit":https://github.com/caolan/nodeunit
+
+Basically "caolan":http://caolanmcmahon.com/ is awesome.
