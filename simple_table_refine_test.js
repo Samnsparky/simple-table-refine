@@ -391,6 +391,78 @@ exports.testIgnoreRowIfValLooseAny = function(test)
 
 
 /**
+ * Test removing rows by testing for an index with an equality operator.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreRowEqualityIndex = function(test)
+{
+    var testInput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2'],
+        ['targetVal1', 'throw this row out', 'targetVal2'],
+        ['targetVal1', 'targetVal1', 'targetVal2'],
+        ['notTargetVal1', 'dont touch me', 'targetVal3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2']
+    ];
+    var testOperation = {
+        operation: 'ignoreRowIf',
+        param: [
+            {index: '>=1'}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing rows by testing for an index with an equality operator.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreRowEqualityIndexAllOf = function(test)
+{
+    var testInput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2'],
+        ['targetVal1', 'throw this row out', 'targetVal2'],
+        ['targetVal1', 'targetVal1', 'targetVal2'],
+        ['notTargetVal1', 'dont touch me', 'targetVal3']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me', 'targetVal2'],
+        ['notTargetVal1', 'dont touch me', 'targetVal3']
+    ];
+    var testOperation = {
+        operation: 'ignoreRowIf',
+        param: [
+            {allOf: [
+                {index: '>= 1'},
+                {col: 0, val: 'targetVal1'}
+            ]}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
  * Test removing columns by their index.
  *
  * @param {nodeunit.test} test The test this routine is running under.
@@ -776,6 +848,76 @@ exports.testIgnoreColIfValLooseAny = function(test)
         param: [
             {row: 'any', val: '1'},
             {row: 2, val: '2'}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing columns by their index with an inequality operator.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreColEqualityIndex = function(test)
+{
+    var testInput = [
+        ['0', '3', 'notTargetVal1', 'dont touch me', '0'],
+        ['1', '1', 'targetVal', 'get rid of that column', '1'],
+        ['2', '2', 'notTargetVal2', 'dont touch me either', '2']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me'],
+        ['targetVal', 'get rid of that column'],
+        ['notTargetVal2', 'dont touch me either']
+    ];
+    var testOperation = {
+        operation: 'ignoreColIf',
+        param: [
+            {index: '< 2'}
+        ]
+    };
+
+    simple_table_refine.refine(
+        testOperation,
+        testInput,
+        function (actualOutput) {
+            test.deepEqual(actualOutput, expectedOutput);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test removing columns by their index with an inequality operator.
+ *
+ * @param {nodeunit.test} test The test this routine is running under.
+**/
+exports.testIgnoreColEqualityIndexAllOf = function(test)
+{
+    var testInput = [
+        ['0', '3', 'notTargetVal1', 'dont touch me', '0'],
+        ['1', '1', 'targetVal', 'get rid of that column', '1'],
+        ['2', '2', 'notTargetVal2', 'dont touch me either', '2']
+    ];
+    var expectedOutput = [
+        ['notTargetVal1', 'dont touch me'],
+        ['targetVal', 'get rid of that column'],
+        ['notTargetVal2', 'dont touch me either']
+    ];
+    var testOperation = {
+        operation: 'ignoreColIf',
+        param: [
+            {allOf: [{index: '< 2'}]}
         ]
     };
 
