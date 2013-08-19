@@ -1,4 +1,15 @@
-var ANY_OPT = 'any';
+/**
+ * Common functionality across the entire library.
+ *
+ * Common routines and constants relevant to more than one sub-module in the
+ * simple-table-refine microlibrary.
+ *
+ * @author Sam Pottinger
+ * @license MIT
+**/
+
+
+exports.ANY_OPT = 'any';
 
 var equalityStrategies = {
     '==': function(value){ return function(op) { return op == value}; },
@@ -10,24 +21,60 @@ var equalityStrategies = {
 };
 
 
+/**
+ * Create a function which evalutes for the given inequality.
+ *
+ * @param {String} inequality The inequality to test for.
+ * @return {function} Function that returns true when the inequality passes
+ *      and false otherwise. That function takes an operator to test against
+ *      (will evaluate like the operator is on the left side of the inequality).
+**/
 exports.createEqualityEvaluator = function(inequality)
 {
+    if(inequality.length < 3)
+        return null;
+
     var operator = inequality.substr(0, 2);
     var value = Number(inequality.substr(2));
 
-    return equalityStrategies[operator](value);
+    var strategy = equalityStrategies[operator](value);
+    if(strategy === undefined)
+        return null;
+    else
+        return strategy;
 };
 
 
+/**
+ * Simple state machine to combine the results of many rules.
+ *
+ * @param {boolean} combineWithAnd If true, the provided boolean values will be
+ *      joined with logical and. Otherwise they will be joined with logical or.
+**/
 exports.RuleCombiner = function(combineWithAnd)
 {
     this.clauseResults = [];
 
+    /**
+     * Report a new result (boolean value combined behavior set in constructor).
+     *
+     * @param {boolean} clauseResult The result to report.
+    **/
     this.reportShouldKeep = function (clauseResult)
     {
         this.clauseResults.push(clauseResult);
     }
 
+    /**
+     * Combine all of the results and indicate if the row should be kept or not.
+     *
+     * Combine all of the rule results and incidate if the row should be kept or
+     * not. If combineWithAnd was true in construction, any rule being
+     * satisfied means that the row should be thrown out. Otherwise, all rules
+     * must be satisfied.
+     *
+     * @return {boolean} True if the row should be kept. False otherwise.
+    **/
     this.shouldKeep = function ()
     {
         if (combineWithAnd) {
@@ -71,8 +118,8 @@ exports.genericErrorHandler = function(err)
 **/
 exports.prepareListOfIndices = function(input)
 {
-    if(input === undefined || input === ANY_OPT)
-        return ANY_OPT;
+    if(input === undefined || input === exports.ANY_OPT)
+        return exports.ANY_OPT;
     else if(input instanceof Array)
         return input;
     else
@@ -95,6 +142,17 @@ exports.findMaxNumCols = function(targetRows)
 }
 
 
+/**
+ * Create a function to check to see if an index satsfies all index rules.
+ *
+ * Create a function to check to see if a provided index satisfies all of the
+ * rules in a set of rules that test for an index.
+ *
+ * @param {Array of Object} rules The rules to check for.
+ * @return {function} Function that takes an index that thecks to see if all of
+ *      the index-based rules from the provided rule set are satsified by the
+ *      given index.
+**/
 exports.createKeepIndexChecker = function(rules)
 {
     // Create rules to ignore rows with a certain index.
@@ -108,14 +166,16 @@ exports.createKeepIndexChecker = function(rules)
         if (index instanceof Array) {
             ignoreRows.push.apply(ignoreRows, e.index);
         } else if (index instanceof String || typeof index === 'string') {
-            ignoreRowEvaluators.push(createEqualityEvaluator(e.index))
+            ignoreRowEvaluators.push(
+                exports.createEqualityEvaluator(e.index)
+            );
         } else {
-            return ignoreRows.push(e.index);
+            ignoreRows.push(e.index);
         }
     });
 
     if (ignoreRowRules.length == 0){
-        return null;
+        return function (rowIndex) { return true; };
     } else {
         return function (rowIndex) {
             rowIndex = parseInt(rowIndex, 10);

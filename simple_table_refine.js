@@ -17,7 +17,7 @@ var col_filter = require('./col_filter');
 var row_filter = require('./row_filter');
 var str_ops = require('./str_ops');
 var structure_ops = require('./structure_ops');
-var util = require('./util');
+var refine_util = require('./refine_util');
 
 // Index of available refinement strategies
 var refineStrategies = {
@@ -89,7 +89,7 @@ function executeOperation(operation, targetRows, onSuccess, onError)
 exports.refine = function(operation, targetRows, onSuccess, onError)
 {
     if(onError === undefined)
-        onError = util.genericErrorHandler;
+        onError = refine_util.genericErrorHandler;
     
     var operations;
     if(!(operation instanceof Array)) {

@@ -1,3 +1,6 @@
+var refine_util = require('./refine_util');
+
+
 /**
  * Transpose a 2D array.
  *
@@ -15,7 +18,7 @@
 **/
 exports.transpose = function (targetRows, params, onSuccess, onError)
 {
-    var numCols = findMaxNumCols(targetRows);
+    var numCols = refine_util.findMaxNumCols(targetRows);
     var retVal = [];
     
     for(var i=0; i<numCols; i++)

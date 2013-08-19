@@ -1,4 +1,6 @@
-var util = require('./util');
+var moment = require('moment');
+
+var refine_util = require('./refine_util');
 
 
 /**
@@ -16,19 +18,19 @@ var util = require('./util');
  *      orig and new attribute, each a string. The former is the string to
  *      search for and the later is the string to replace it with.
 **/
-function replace(targetRows, params, onSuccess, onError)
+exports.replace = function(targetRows, params, onSuccess, onError)
 {
     // Generate functions to replace certain strings with others.
     var replaceFuncs = params.map(function (rule) {
         
-        var rows = util.prepareListOfIndices(rule.row);
-        var cols = util.prepareListOfIndices(rule.col);
+        var rows = refine_util.prepareListOfIndices(rule.row);
+        var cols = refine_util.prepareListOfIndices(rule.col);
         
         return function (target, rowIndex, colIndex) {
-            if(rows !== ANY_OPT && rows.indexOf(rowIndex) == -1)
+            if(rows !== refine_util.ANY_OPT && rows.indexOf(rowIndex) == -1)
                 return target;
 
-            if(cols !== ANY_OPT && cols.indexOf(colIndex) == -1)
+            if(cols !== refine_util.ANY_OPT && cols.indexOf(colIndex) == -1)
                 return target;
 
             if(rule.orig === target)
@@ -144,8 +146,8 @@ exports.interpretStr = function (targetRows, params, onSuccess, onError)
     };
 
     // Parse user options for which rows and columns to operate on.
-    var rows = util.prepareListOfIndices(params.row);
-    var cols = util.prepareListOfIndices(params.col);
+    var rows = refine_util.prepareListOfIndices(params.row);
+    var cols = refine_util.prepareListOfIndices(params.col);
 
     // Run the interpret function on all cells in table (elements in Array).
     var retVal = [];
@@ -153,12 +155,12 @@ exports.interpretStr = function (targetRows, params, onSuccess, onError)
     var numRows = targetRows.length;
     for (var rowIndex=0; rowIndex<numRows; rowIndex++) {
         var targetRow = targetRows[rowIndex];
-        if (rows === ANY_OPT || rows.indexOf(rowIndex) != -1) {
+        if (rows === refine_util.ANY_OPT || rows.indexOf(rowIndex) != -1) {
             var newRow = [];
             var numCols = targetRow.length;
             for (var colIndex=0; colIndex<numCols; colIndex++) {
                 var targetVal = targetRow[colIndex];
-                if (cols === ANY_OPT || cols.indexOf(colIndex) != -1) {
+                if (cols===refine_util.ANY_OPT || cols.indexOf(colIndex)!=-1) {
                     targetVal = interpretValue(targetVal);
                     newRow.push(targetVal);
                 } else {

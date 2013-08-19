@@ -1,4 +1,4 @@
-var util = require('./util');
+var refine_util = require('./refine_util');
 
 
 /**
@@ -36,10 +36,10 @@ function findColsByVal(valueIndexIgnoreRules, targetRows)
     for(var ruleIndex=0; ruleIndex<numRules; ruleIndex++)
     {
         var currentRule = valueIndexIgnoreRules[ruleIndex];
-        var rowIndices = util.prepareListOfIndices(currentRule.row);
+        var rowIndices = refine_util.prepareListOfIndices(currentRule.row);
 
         // Either check all rows or check user specified set of rows.
-        if (rowIndices === ANY_OPT) {
+        if (rowIndices === refine_util.ANY_OPT) {
             checkRows(currentRule, targetRows);
         } else {
             var numRows = targetRows.length;
@@ -77,7 +77,7 @@ function findColsByCombinedVals(rules, targetRows)
 {
     var matchedCols = [];
     var allowedColsToMatch = [];
-    var numCols = findMaxNumCols(targetRows);
+    var numCols = refine_util.findMaxNumCols(targetRows);
 
     // Check a set of rows for columns that contain all of a set of values,
     // reporting matched columns by adding them to the matchedCols Array.
@@ -108,10 +108,10 @@ function findColsByCombinedVals(rules, targetRows)
 
             // Go through each component of the current rule to check for a
             // match.
-            var rowIndices = util.prepareListOfIndices(subRule.row);
+            var rowIndices = refine_util.prepareListOfIndices(subRule.row);
 
             // Only use columns specified by user spec
-            if (rowIndices === ANY_OPT) {
+            if (rowIndices === refine_util.ANY_OPT) {
                 if(!checkRows(targetRows, subRule, colIndex))
                     matched = false;
             } else {
@@ -130,26 +130,21 @@ function findColsByCombinedVals(rules, targetRows)
             matchedCols.push(colIndex);
     };
 
+    // Determine if the user limited the columns the operation runs on.
     var indexRules = rules.filter(function (rule) {
         return rule.index !== undefined;
     });
-    var colsToExamineByRule = indexRules.map(function (e) {
-        if(e.index instanceof Array)
-            return e.index;
-        else
-            return [e.index];
-    });
-    var colsToExamine;
-    if (colsToExamineByRule.length > 0) {
-        colsToExamine = colsToExamineByRule.reduce(function(a, b) {
-            return a.concat(b);
-        });
-    } else {
-        colsToExamine = [];
+    var colsToExamine = [];
+    var numCols = targetRows[0].length;
+    var indexChecker = refine_util.createKeepIndexChecker(indexRules);
+    for (var i=0; i<numCols; i++) {
+        if (!indexChecker(i)) {
+            colsToExamine.push(i);
+        }
     }
     var examineAllCols = colsToExamine.length == 0;
 
-    // Go through all of the columns in the dataset
+    // Go through all of the relevant columns in the dataset
     for (var colIndex=0; colIndex<numCols; colIndex++) {
         if (examineAllCols || colsToExamine.indexOf(colIndex) != -1) {
             runValueSearchRules(colIndex);
@@ -206,7 +201,7 @@ function removeCols(targetRows, cols)
  *      has been modified. This function should take a single parameter: the
  *      modified copy of the original dataset.
 **/
-function ignoreColIf(targetRows, params, onSuccess, onError)
+exports.ignoreColIf = function(targetRows, params, onSuccess, onError)
 {
     var colIndicesToIgnore = [];
 
@@ -215,17 +210,17 @@ function ignoreColIf(targetRows, params, onSuccess, onError)
     var colIndexIgnoreRules = params.filter(function (e) {
         return e.index !== undefined;
     });
-    var indicesExplicitlyIgnored = colIndexIgnoreRules.map(function (e) {
-        return e.index;
-    });
-    colIndicesToIgnore.push.apply(
-        colIndicesToIgnore,
-        indicesExplicitlyIgnored
-    );
+    var indexChecker = refine_util.createKeepIndexChecker(colIndexIgnoreRules);
+    var numCols = targetRows[0].length;
+    for (var i=0; i<numCols; i++)
+    {
+        if (!indexChecker(i))
+            colIndicesToIgnore.push(i);
+    }
 
     // Search for columns to ignore / remove based on having one of many values.
     var valueIndexIgnoreRules = params.filter(function (e) {
-        return e.row !== undefined;
+        return e.val !== undefined;
     });
     colIndicesToIgnore.push.apply(
         colIndicesToIgnore,

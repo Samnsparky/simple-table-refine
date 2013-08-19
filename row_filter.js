@@ -1,4 +1,4 @@
-var util = require('./util');
+var refine_util = require('./refine_util');
 
 
 /**
@@ -20,10 +20,11 @@ function createKeepRowValFuncs(ignoreValueRules)
         var targetCol = rule.col;
         var targetVal = rule.val;
 
-        var targetCols = util.prepareListOfIndices(targetCol);
+        var targetCols = refine_util.prepareListOfIndices(targetCol);
 
-        if (targetCols === util.ANY_OPT) {
+        if (targetCols === refine_util.ANY_OPT) {
             return function (row, rowIndex) {
+
                 var numColumns = row.length;
                 for (var column=0; column<numColumns; column++) {
                     if (row[column] === targetVal)
@@ -48,10 +49,27 @@ function createKeepRowValFuncs(ignoreValueRules)
 }
 
 
+/**
+ * Create a function that checks for various rules on a row.
+ *
+ * Create a function that takes in a row (Array) and row index (Number) and
+ * and returns true if that row should be kept (not removed during sanitization)
+ * and false otherwise. Satisfying a rule means that row should be removed.
+ *
+ * @param {Array of Object} rules An Array of rules that the function should
+ *      check for.
+ * @param {boolean} combinedWithAnd If true, satisfying any rule will have the
+ *      row marked for removal. If false, all rules must be satisfied for a row
+ *      to be marked for removal.
+ * @return {function} Function that tests for all of the provided rules.
+**/
 function createRowKeepFunc(rules, combinedWithAnd)
 {
-    var shouldKeepIndex = util.createKeepIndexChecker(rules);
-    var hasIgnoreRules = shouldKeepIndex !== null;
+    var ignoreRowRules = rules.filter(function (e) {
+        return e.index !== undefined;
+    });
+    var hasIgnoreRules = ignoreRowRules.length > 0;
+    var shouldKeepIndex = refine_util.createKeepIndexChecker(rules);
 
     // Create rules to ignore rows containing any one of many values.
     var ignoreValueRules = rules.filter(function (e) {
@@ -77,7 +95,7 @@ function createRowKeepFunc(rules, combinedWithAnd)
     if (!hasIgnoreRules) {
         shouldKeepFunc = function(row, rowIndex)
         {
-            var ruleCombiner = new util.RuleCombiner(combinedWithAnd);
+            var ruleCombiner = new refine_util.RuleCombiner(combinedWithAnd);
 
             for (var i=0; i<numShouldKeepFuncs; i++) {
                 var targetFunc = shouldKeepFuncs[i];
@@ -94,14 +112,15 @@ function createRowKeepFunc(rules, combinedWithAnd)
     } else {
         shouldKeepFunc = function(row, rowIndex)
         {
-            var ruleCombiner = new util.RuleCombiner(combinedWithAnd);
+            var ruleCombiner = new refine_util.RuleCombiner(combinedWithAnd);
 
             ruleCombiner.reportShouldKeep(shouldKeepIndex(rowIndex));
             for (var i=0; i<numShouldKeepFuncs; i++) {
                 var targetFunc = shouldKeepFuncs[i];
                 ruleCombiner.reportShouldKeep(targetFunc(row, rowIndex));
             }
-
+            console.log(combinedWithAnd);
+            console.log(ruleCombiner.clauseResults);
             return ruleCombiner.shouldKeep();
         };
     }
@@ -131,8 +150,6 @@ function createRowKeepFunc(rules, combinedWithAnd)
 exports.ignoreRowIf = function (targetRows, params, onSuccess, onError)
 {
     var shouldKeepFunc = createRowKeepFunc(params, true);
-
-    console.log('??????????');
 
     // Run the rules and create the modified version of the dataset.
     var retVal = [];

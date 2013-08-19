@@ -875,9 +875,9 @@ exports.testIgnoreColEqualityIndex = function(test)
         ['2', '2', 'notTargetVal2', 'dont touch me either', '2']
     ];
     var expectedOutput = [
-        ['notTargetVal1', 'dont touch me'],
-        ['targetVal', 'get rid of that column'],
-        ['notTargetVal2', 'dont touch me either']
+        ['notTargetVal1', 'dont touch me', '0'],
+        ['targetVal', 'get rid of that column', '1'],
+        ['notTargetVal2', 'dont touch me either', '2']
     ];
     var testOperation = {
         operation: 'ignoreColIf',
@@ -910,9 +910,9 @@ exports.testIgnoreColEqualityIndexAllOf = function(test)
         ['2', '2', 'notTargetVal2', 'dont touch me either', '2']
     ];
     var expectedOutput = [
-        ['notTargetVal1', 'dont touch me'],
-        ['targetVal', 'get rid of that column'],
-        ['notTargetVal2', 'dont touch me either']
+        ['notTargetVal1', 'dont touch me', '0'],
+        ['targetVal', 'get rid of that column', '1'],
+        ['notTargetVal2', 'dont touch me either', '2']
     ];
     var testOperation = {
         operation: 'ignoreColIf',
