@@ -17,7 +17,7 @@ Data refinement takes longer than it should and frequently involves something ta
 
 Installation
 ------------
-This micro-library is still under heavy development and the development teams decided not to release this to npm yet. Please include the project manually.
+```npm install simple-table-refine```
 
 
 Quickstart
