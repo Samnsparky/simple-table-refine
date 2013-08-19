@@ -23,5 +23,6 @@
     "dependencies":{
         "async": "~0",
         "moment": "~2"
-    }
+    },
+    "main": "./lib/simple_table_refine.js"
 }

@@ -5,7 +5,7 @@
  * @license MIT
 **/
 
-var simple_table_refine = require('./simple_table_refine');
+var simple_table_refine = require('./lib/simple_table_refine');
 
 
 /**
