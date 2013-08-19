@@ -67,33 +67,7 @@ simple_table_refine.refine(
     },
 );
 ```
-
-
-Status of the project
----------------------
-Existing features are tested and the interfaces to them will remain the same through the 0.* releases. However, this micro-library remains under active development. Have an idea of something you want to see? Open an issue on the GitHub repository issue tracker.
-
-
-Development Environment and Standards
--------------------------------------
-This project maintains 80% code coverage and conforms to Google's JavaScript Style Guidelines. All inline documentation should follow the jsDoc standard.
-
-
-Testing
--------
-```nodeunit simple_table_refine_test.js```
-
-You may need to install [nodeunit](https://github.com/caolan/nodeunit first).
-
-
-h2. Technologies and Resources Used
-
-* [async](https://github.com/caolan/async)
-* [Moment.js](http://momentjs.com/)
-* [nodeunit](https://github.com/caolan/nodeunit)
-
-Basically [caolan](http://caolanmcmahon.com/) is awesome.
-
+  
 
 API
 ---
@@ -174,4 +148,29 @@ All attributes are optional. If the numbers, bools, and / or dates attributes ar
 
 ###transpose   
  Runs a matrix transpose operation. This operation does not take any parameters (no value should be provided for param).
+  
 
+Status of the project
+---------------------
+Existing features are tested and the interfaces to them will remain the same through the 0.* releases. However, this micro-library remains under active development. Have an idea of something you want to see? Open an issue on the GitHub repository issue tracker.
+
+
+Development Environment and Standards
+-------------------------------------
+This project maintains 80% code coverage and conforms to Google's JavaScript Style Guidelines. All inline documentation should follow the jsDoc standard.
+
+
+Testing
+-------
+```nodeunit simple_table_refine_test.js```
+
+You may need to install [nodeunit](https://github.com/caolan/nodeunit first).
+
+
+Technologies and Resources Used
+--------------------------------
+* [async](https://github.com/caolan/async)
+* [Moment.js](http://momentjs.com/)
+* [nodeunit](https://github.com/caolan/nodeunit)
+
+Basically [caolan](http://caolanmcmahon.com/) is awesome.
