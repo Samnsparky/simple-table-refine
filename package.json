@@ -25,5 +25,10 @@
         "moment": "~2"
     },
     "main": "./lib/simple_table_refine.js",
-    "homepage": "https://github.com/samnsparky/simple-table-refine"
+    "homepage": "https://github.com/samnsparky/simple-table-refine",
+    "repository":
+    {
+        "type" : "git",
+        "url" : "https://github.com/Samnsparky/simple-table-refine.git"
+    }
 }
